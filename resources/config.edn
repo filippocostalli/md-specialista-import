@@ -1,0 +1,17 @@
+{:md-specialista-db {:dbtype "postgresql"
+                     :dbname "md_specialista"
+                     :host "10.10.115.151"
+                     :user "postgres"
+                     :password "marno"
+                     :sslfactory "org.postgresql.ssl.NonValidatingFactory"}
+ :summa-db {:dbtype "mssql"
+            :host "summac5\\SQLEXPRESS"
+            :dbname "anagrafica_090_201"
+            :user "summa"
+            :password "marno"}
+ :report-db {:dbtype "mssql"
+             :host "summac3"
+             :port "1433"
+             :dbname "REPORTPDF"
+             :user "sa"
+             :password "Marno_123"}}
