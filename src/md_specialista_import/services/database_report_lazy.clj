@@ -49,7 +49,7 @@
 
 
 (defn print-report! [reports]
-  (println "alohaa"))
+  (println (str "alohaa -> " (count reports))))
 
 (defn handle-report [par x]
   (->> x

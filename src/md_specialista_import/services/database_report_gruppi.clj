@@ -22,7 +22,7 @@
 (defn get-aree-referenti [m]
   (jdbc/query db-report ["SELECT DISTINCT asl_cod+dip_cod+area_cod AS gruppo_codice, area_ref AS gruppo_referente_cf, 'AREA' AS descrizione FROM report
                           WHERE regione=? AND asl=? AND anno=? AND mese_da=? AND mese_a=? AND report_code='rv22m1'
-                          AND area_ref is not null"
+                          AND area_ref is not null AND LEN(asl_cod+dip_cod+area_cod)=8"
                          (:regione m) (:asl m) (:anno m) (:mese_da m) (:mese_a m)]))
 
 (defn get-soc-referenti [m]
@@ -34,7 +34,7 @@
 (defn get-sos-referenti [m]
   (jdbc/query db-report ["SELECT DISTINCT asl_cod+dip_cod+area_cod+soc_cod+sos_cod AS gruppo_codice, sos_ref AS gruppo_referente_cf, 'SOS' AS descrizione FROM report
                           WHERE regione=? AND asl=? AND anno=? AND mese_da=? AND mese_a=? AND report_code='rv22m1'
-                          AND sos_ref is not null params"
+                          AND sos_ref is not null AND LEN(asl_cod+dip_cod+area_cod+soc_cod+sos_cod)=17"
                           (:regione m) (:asl m) (:anno m) (:mese_da m) (:mese_a m)]))
 
 (defn medico-cf->medico-id [codfis]
@@ -72,27 +72,35 @@
 (defn import-dipartimenti-report [m]
   (->> m
        (get-dipartimenti-referenti)
+       (filter #(not-empty(:gruppo_referente_cf %)))
        (map (partial  medico->gruppo-report m))
-       (filter #(is-report? %))))
+       (filter #(is-report? %))
+       (count)))
        ;;(insert-report!)))
 
 (defn import-aree-report [m]
   (->> m
        (get-aree-referenti)
+       (filter #(not-empty(:gruppo_referente_cf %)))
        (map (partial  medico->gruppo-report m))
-       (filter #(is-report? %))))
+       (filter #(is-report? %))
+       (count)))
        ;;(insert-report!)))
 
 (defn import-soc-report [m]
   (->> m
        (get-soc-referenti)
+       (filter #(not-empty(:gruppo_referente_cf %)))
        (map (partial  medico->gruppo-report m))
-       (filter #(is-report? %))))
+       (filter #(is-report? %))
+       (count)))
        ;;(insert-report!)))
 
 (defn import-sos-report [m]
   (->> m
        (get-sos-referenti)
+       (filter #(not-empty(:gruppo_referente_cf %)))
        (map (partial  medico->gruppo-report m))
-       (filter #(is-report? %))))
+       (filter #(is-report? %))
+       (count)))
        ;;(insert-report!)))
