@@ -37,5 +37,5 @@
          (log/info (str "Lavoriamo con asl = " (:asl_id (first asl))))
          (log/info (str "cli: " cli-res))
          (log/info (str "parametri: " map-par))
-         (log/info (str "tutti: " (assoc map-par :asl_id (:asl_id (first asl)))))))))
-         ;;(import-report (assoc map-par :asl_id (:asl_id (first asl))))))))
+         (log/info (str "tutti: " (assoc map-par :asl_id (:asl_id (first asl)))))
+         (import-report (assoc map-par :asl_id (:asl_id (first asl))))))))

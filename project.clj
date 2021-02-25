@@ -13,7 +13,9 @@
                  [cambium/cambium.core "0.9.3"]
                  [cambium/cambium.codec-simple "0.9.3"]
                  [cambium/cambium.logback.core "0.4.3"]
-                 [digest "1.4.9"]]
+                 [digest "1.4.9"]
+                 [parallel "0.10"]
+                 [hikari-cp "2.13.0"]]
   :jvm-opts ["-Xmx2g"]
   :main ^:skip-aot md-specialista-import.core
   :target-path "target/%s"

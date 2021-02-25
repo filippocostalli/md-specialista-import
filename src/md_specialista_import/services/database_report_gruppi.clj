@@ -7,29 +7,36 @@
     [clj-time.coerce :as time-coerce]
     [digest :as digest]
     [clj-time.core :as time]
-    [clj-time.coerce :as time-coerce]))
+    [clj-time.coerce :as time-coerce]
+    [parallel.core :as p]
+    [hikari-cp.core :as cp]))
 
 (def db-specialista (:md-specialista-db conf/configuration))
-
 (def db-report (:report-db conf/configuration))
 
+(defonce db-report-par
+  (delay (cp/make-datasource (:report-db-par conf/configuration))))
+(defonce db-specialista-par
+  (delay (cp/make-datasource (:specialista-db-par conf/configuration))))
+
 (defn get-dipartimenti-referenti [m]
-  (jdbc/query db-report ["SELECT DISTINCT asl_cod+dip_cod AS gruppo_codice, dip_ref AS gruppo_referente_cf, 'DIPARTIMENTO' AS descrizione FROM report
-                          WHERE regione=? AND asl=? AND anno=? AND mese_da=? AND mese_a=? AND report_code='rv22m1'
-                          AND dip_ref is not null AND LEN(asl_cod+dip_cod)=5"
-                          (:regione m) (:asl m) (:anno m) (:mese_da m) (:mese_a m)]))
+    (jdbc/query db-report ["SELECT DISTINCT asl_cod+dip_cod AS gruppo_codice, dip_ref AS gruppo_referente_cf, 'DIPARTIMENTO' AS descrizione FROM report
+                            WHERE regione=? AND asl=? AND anno=? AND mese_da=? AND mese_a=? AND report_code='rv22m1'
+                            AND dip_ref is not null AND LEN(asl_cod+dip_cod)=5"
+                            (:regione m) (:asl m) (:anno m) (:mese_da m) (:mese_a m)]))
 
 (defn get-aree-referenti [m]
-  (jdbc/query db-report ["SELECT DISTINCT asl_cod+dip_cod+area_cod AS gruppo_codice, area_ref AS gruppo_referente_cf, 'AREA' AS descrizione FROM report
-                          WHERE regione=? AND asl=? AND anno=? AND mese_da=? AND mese_a=? AND report_code='rv22m1'
-                          AND area_ref is not null AND LEN(asl_cod+dip_cod+area_cod)=8"
-                         (:regione m) (:asl m) (:anno m) (:mese_da m) (:mese_a m)]))
+    (jdbc/query db-report ["SELECT DISTINCT asl_cod+dip_cod+area_cod AS gruppo_codice, area_ref AS gruppo_referente_cf, 'AREA' AS descrizione FROM report
+                            WHERE regione=? AND asl=? AND anno=? AND mese_da=? AND mese_a=? AND report_code='rv22m1'
+                            AND area_ref is not null AND LEN(asl_cod+dip_cod+area_cod)=8"
+                            (:regione m) (:asl m) (:anno m) (:mese_da m) (:mese_a m)]))
 
 (defn get-soc-referenti [m]
-  (jdbc/query db-report ["SELECT DISTINCT asl_cod+dip_cod+area_cod+soc_cod AS gruppo_codice, soc_ref AS gruppo_referente_cf, 'SOC' AS descrizione FROM report
-                          WHERE regione=? AND asl=? AND anno=? AND mese_da=? AND mese_a=? AND report_code='rv22m1'
-                          AND soc_ref is not null AND LEN(asl_cod+dip_cod+area_cod+soc_cod)=12"
-                         (:regione m) (:asl m) (:anno m) (:mese_da m) (:mese_a m)]))
+  (let [conn {:datasource @db-report-par}]
+    (jdbc/query conn ["SELECT DISTINCT asl_cod+dip_cod+area_cod+soc_cod AS gruppo_codice, soc_ref AS gruppo_referente_cf, 'SOC' AS descrizione FROM report
+                       WHERE regione=? AND asl=? AND anno=? AND mese_da=? AND mese_a=? AND report_code='rv22m1'
+                       AND soc_ref is not null AND LEN(asl_cod+dip_cod+area_cod+soc_cod)=12"
+                       (:regione m) (:asl m) (:anno m) (:mese_da m) (:mese_a m)])))
 
 (defn get-sos-referenti [m]
   (jdbc/query db-report ["SELECT DISTINCT asl_cod+dip_cod+area_cod+soc_cod+sos_cod AS gruppo_codice, sos_ref AS gruppo_referente_cf, 'SOS' AS descrizione FROM report
@@ -38,12 +45,14 @@
                           (:regione m) (:asl m) (:anno m) (:mese_da m) (:mese_a m)]))
 
 (defn medico-cf->medico-id [codfis]
-   (jdbc/query db-specialista ["SELECT medico_id FROM medico WHERE medico_codfiscale=?" codfis]))
+  (let [conn {:datasource @db-specialista-par}]
+    (jdbc/query db-specialista ["SELECT medico_id FROM medico WHERE medico_codfiscale=?" codfis])))
 
 (defn get-report-medico [m]
-  (jdbc/query db-report
-               ["SELECT pdfData FROM report WHERE fiscale = ? AND regione = ? AND asl = ? AND anno = ? AND mese_da = ? AND mese_a = ? AND report_code ='rv22m1'"
-                (:codice-fiscale m) (:regione m) (:asl m) (:anno m) (:mese_da m) (:mese_a m)]))
+    (let [conn {:datasource @db-report-par}]
+       (jdbc/query conn
+                    ["SELECT pdfData FROM report WHERE fiscale = ? AND regione = ? AND asl = ? AND anno = ? AND mese_da = ? AND mese_a = ? AND report_code ='rv22m1'"
+                     (:codice-fiscale m) (:regione m) (:asl m) (:anno m) (:mese_da m) (:mese_a m)])))
 
 (defn medico->gruppo-report [par rs]
    (let [{anno :anno mese_da :mese_da mese_a :mese_a} par
@@ -82,7 +91,7 @@
   (->> m
        (get-aree-referenti)
        (filter #(not-empty(:gruppo_referente_cf %)))
-       (map (partial  medico->gruppo-report m))
+       (pmap (partial  medico->gruppo-report m))
        (filter #(is-report? %))
        (count)))
        ;;(insert-report!)))
@@ -91,7 +100,7 @@
   (->> m
        (get-soc-referenti)
        (filter #(not-empty(:gruppo_referente_cf %)))
-       (map (partial  medico->gruppo-report m))
+       (pmap (partial  medico->gruppo-report m))
        (filter #(is-report? %))
        (count)))
        ;;(insert-report!)))
@@ -100,7 +109,7 @@
   (->> m
        (get-sos-referenti)
        (filter #(not-empty(:gruppo_referente_cf %)))
-       (map (partial  medico->gruppo-report m))
+       (pmap (partial  medico->gruppo-report m))
        (filter #(is-report? %))
        (count)))
        ;;(insert-report!)))

@@ -9,9 +9,46 @@
             :dbname "anagrafica_090_201"
             :user "summa"
             :password "marno"}
+
  :report-db {:dbtype "mssql"
              :host "summac3"
              :port "1433"
              :dbname "REPORTPDF"
              :user "sa"
-             :password "Marno_123"}}
+             :password "Marno_123"}
+
+ :report-db-par {
+                     :auto-commit        true
+                     :read-only          true
+                     :connection-timeout 30000
+                     :validation-timeout 5000
+                     :idle-timeout       600000
+                     :max-lifetime       1800000
+                     :minimum-idle       10
+                     :maximum-pool-size  40
+                     :pool-name          "report-db-pool"
+                     :adapter            "sqlserver"
+                     :username           "sa"
+                     :password           "Marno_123"
+                     :database-name      "REPORTPDF"
+                     :server-name        "summac3"
+                     :port-number        1433
+                     :register-mbeans    false}
+
+  :specialista-db-par {
+                        :auto-commit        true
+                        :read-only          false
+                        :connection-timeout 30000
+                        :validation-timeout 5000
+                        :idle-timeout       600000
+                        :max-lifetime       1800000
+                        :minimum-idle       10
+                        :maximum-pool-size  40
+                        :pool-name          "specialista-db-pool"
+                        :adapter            "postgresql"
+                        :username           "postgres"
+                        :password           "marno"
+                        :database-name      "md_specialista"
+                        :server-name        "10.10.115.151"
+                        :port-number        5432
+                        :register-mbeans    false}}
