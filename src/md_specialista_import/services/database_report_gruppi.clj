@@ -76,7 +76,6 @@
 
 (defn insert-report! [reports]
   (jdbc/insert-multi! db-specialista :report reports))
-    ;;(count reports))
 
 (defn import-dipartimenti-report [m]
   (->> m
