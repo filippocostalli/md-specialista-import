@@ -20,7 +20,7 @@
   (delay (cp/make-datasource (:specialista-db-par conf/configuration))))
 
 (defn get-dipartimenti-referenti [m]
-    (jdbc/query db-report ["SELECT DISTINCT asl_cod+dip_cod AS gruppo_codice, dip_ref AS gruppo_referente_cf, 'DIPARTIMENTO' AS descrizione FROM report
+    (jdbc/query db-report ["SELECT DISTINCT asl_cod+dip_cod AS gruppo_codice, dip_ref AS gruppo_referente_cf, 'DIP' AS descrizione FROM report
                             WHERE regione=? AND asl=? AND anno=? AND mese_da=? AND mese_a=? AND report_code='rv22m1'
                             AND dip_ref is not null AND LEN(asl_cod+dip_cod)=5"
                             (:regione m) (:asl m) (:anno m) (:mese_da m) (:mese_a m)]))
@@ -82,10 +82,10 @@
   (->> m
        (get-dipartimenti-referenti)
        (filter #(not-empty(:gruppo_referente_cf %)))
-       (map (partial  medico->gruppo-report m))
+       (pmap (partial  medico->gruppo-report m))
        (filter #(is-report? %))
+       (insert-report!)
        (count)))
-       ;;(insert-report!)))
 
 (defn import-aree-report [m]
   (->> m
@@ -93,8 +93,8 @@
        (filter #(not-empty(:gruppo_referente_cf %)))
        (pmap (partial  medico->gruppo-report m))
        (filter #(is-report? %))
+       (insert-report!)
        (count)))
-       ;;(insert-report!)))
 
 (defn import-soc-report [m]
   (->> m
@@ -102,8 +102,8 @@
        (filter #(not-empty(:gruppo_referente_cf %)))
        (pmap (partial  medico->gruppo-report m))
        (filter #(is-report? %))
+       (insert-report!)
        (count)))
-       ;;(insert-report!)))
 
 (defn import-sos-report [m]
   (->> m
@@ -111,5 +111,5 @@
        (filter #(not-empty(:gruppo_referente_cf %)))
        (pmap (partial  medico->gruppo-report m))
        (filter #(is-report? %))
+       (insert-report!)
        (count)))
-       ;;(insert-report!)))

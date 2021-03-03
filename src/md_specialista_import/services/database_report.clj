@@ -48,6 +48,6 @@
   (->> (get-medici (:asl_id m))
        (map (partial medico->report m))
        (filter #(is-report? %))
+       (insert-report!)
        (count)))
-      ;; (insert-report!)))
 ;;---------------

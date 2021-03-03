@@ -9,14 +9,12 @@
             :dbname "anagrafica_090_201"
             :user "summa"
             :password "marno"}
-
  :report-db {:dbtype "mssql"
              :host "summac3"
              :port "1433"
              :dbname "REPORTPDF"
              :user "sa"
              :password "Marno_123"}
-
  :report-db-par {
                      :auto-commit        true
                      :read-only          true
