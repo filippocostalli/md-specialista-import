@@ -83,7 +83,7 @@
        (filter #(not-empty(:gruppo_referente_cf %)))
        (pmap (partial  medico->gruppo-report m))
        (filter #(is-report? %))
-       ;;(insert-report!)
+       (insert-report!)
        (count)))
 
 (defn import-aree-report [m]
@@ -92,7 +92,7 @@
        (filter #(not-empty(:gruppo_referente_cf %)))
        (pmap (partial  medico->gruppo-report m))
        (filter #(is-report? %))
-       ;;(insert-report!)
+       (insert-report!)
        (count)))
 
 (defn import-soc-report [m]
@@ -101,7 +101,7 @@
        (filter #(not-empty(:gruppo_referente_cf %)))
        (pmap (partial  medico->gruppo-report m))
        (filter #(is-report? %))
-       ;;(insert-report!)
+       (insert-report!)
        (count)))
 
 (defn import-sos-report [m]
@@ -110,5 +110,5 @@
        (filter #(not-empty(:gruppo_referente_cf %)))
        (pmap (partial  medico->gruppo-report m))
        (filter #(is-report? %))
-       ;;(insert-report!)
+       (insert-report!)
        (count)))
